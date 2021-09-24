@@ -1,11 +1,25 @@
 import pygame
+from player import Player
+from util import Vector2
+world = [
+[1,1,1,1,1,1,1],
+[1,0,0,0,0,0,1],
+[1,0,0,0,0,0,1],
+[1,0,0,0,0,0,1],
+[1,0,0,0,1,0,1],
+[1,0,0,0,0,0,1],
+[1,1,1,1,1,1,1]
+]
 
 pygame.init()
 window = pygame.display.set_mode((1280, 720))
-
+player = Player(world,Vector2(3,3),0,0)
+print(player.position);
 run = True
 while run:
+    #Cycles through all the events currently occuring
     for event in pygame.event.get():
+        player.InputListen(event)
         if event.type == pygame.QUIT:
             run = False
 
