@@ -1,6 +1,9 @@
 import pygame
+import sys
 from player import Player
-from util import Vector2
+from util import Vector2, normalise
+import raycast as ray
+import math
 world = [
 [1,1,1,1,1,1,1],
 [1,0,0,0,0,0,1],
@@ -14,7 +17,10 @@ world = [
 pygame.init()
 window = pygame.display.set_mode((1280, 720))
 player = Player(world,Vector2(3,3),0,0)
-print(player.position);
+angle = 45;
+print(Vector2(math.cos(angle*math.pi/180),math.sin(angle*math.pi/180)))
+print(ray.Raycast(world, player.position, normalise(Vector2(math.cos(angle*math.pi/180),math.sin(angle*math.pi/180))), 20))
+sys.exit()
 run = True
 while run:
     #Cycles through all the events currently occuring
