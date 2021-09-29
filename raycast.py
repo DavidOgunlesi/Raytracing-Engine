@@ -1,15 +1,43 @@
 from typing import Type
-from util import Vector2, sign
+from util import Vector2, sign, normalise
+import math
 from math import floor, ceil, sqrt
 
+def RenderViewSamples(world, screenWidth: int, position: Type[Vector2], lookAngle: Type[Vector2], maxDist: int):
+    planeDist = 5
+    planeVector = (position + Vector2(0, planeDist)).rotate(lookAngle)
+    leftPlane = planeVector+Vector2(-screenWidth, 0).rotate(lookAngle)
+    rightPlane = planeVector+Vector2(screenWidth, 0).rotate(lookAngle)
+    sampleVector = rightPlane-leftPlane
+    #sample points on screen along camera plane vector
+    raySamples = []
+    for i in range(1,screenWidth):
+        currPoint = (sampleVector/screenWidth)*i
+        #currPoint = planeVector+Vector2(-screenWidth+i, 0).rotate(lookAngle)
+        #cast rays at sample points
+        #lookAngleRad = lookAngle*math.pi/180
+        NCurrPoint = normalise(currPoint)
+        #v = Vector2(math.cos(lookAngle*math.pi/180),math.sin(lookAngle*math.pi/180))
+        print(90-math.atan2(NCurrPoint.x, NCurrPoint.y)*180/math.pi)
+        #print(currPoint, normalise(currPoint))
+        #direction = normalise(Vector2(math.cos(lookAngleRad),math.sin(lookAngleRad)))
+        ray = Raycast(world, position, normalise(currPoint), maxDist)
+        raySamples.append(ray)
+        #.GetCollisionPointPercentage(ray.collisionPoint)
+    return raySamples
+
+
+"""
+Create a Ray
+"""
 def Raycast(world, startPos: Type[Vector2], direction: Type[Vector2], maxDist: int):
     #for i in range(0, screenWidth):
-    print("start pos", startPos)
-    print("direction", direction)
-    print("maxDist", maxDist)
+    #print("start pos", startPos)
+    #print("direction", direction)
+    #print("maxDist", maxDist)
     ray = Ray(world, startPos, direction, maxDist)
     ray.Propagate(True)
-    return ray.GetCollisionPointPercentage(ray.collisionPoint)
+    return ray
 
 class Ray:
 
@@ -35,8 +63,8 @@ class Ray:
                 stepY = 1
             initialXStep += self.__xRayLength(stepX, self.direction)
             initialYStep += self.__yRayLength(stepY, self.direction)
-            print("stepX", stepX)
-            print("stepY", stepY)
+            #print("stepX", stepX)
+            #print("stepY", stepY)
         else:
             initialXStep += self.__xRayLength(stepSize, self.direction)
             initialYStep += self.__yRayLength(stepSize, self.direction)
@@ -44,7 +72,7 @@ class Ray:
         currentXStep = initialXStep
         currentYStep = initialYStep
         if initialXStep >= initialYStep:
-            print("xStepBigger")
+            #print("xStepBigger")
             # step in y until y is greater than x
             while (currentYStep <= initialXStep):
                 currentYStep += self.__yRayLength(stepSize, self.direction)
@@ -52,10 +80,10 @@ class Ray:
                 # mark visited cell
                 self.currY += sign(self.direction.y)
                 pos = Vector2(self.currX,self.currY)
-                print(pos)
+                #print(pos)
                 self.visitedCells.append(pos)
         else:
-            print("yStepBigger")
+            #print("yStepBigger")
             # step in x until x is greater than y
             while (currentXStep < initialYStep):
                 currentXStep += self.__xRayLength(stepSize, self.direction)
@@ -63,16 +91,18 @@ class Ray:
                 # mark visited cell
                 self.currX += sign(self.direction.x)
                 pos = Vector2(self.currX,self.currY)
-                print(pos)
+                #print(pos)
                 self.visitedCells.append(pos)
 
-        print(self.currDist)
+        #print(self.currDist)
         # Repeat again unless collided with wall or reached max distance
-        if self.currDist <= self.maxDist and (self.world[int(round(self.currY))][int(round(self.currX))]==0):
-            print("continuing ray")
+
+        if self.currDist <= self.maxDist and (len(self.world)>int(round(self.currY)) and len(self.world[0])>int(round(self.currX))) and (self.world[int(round(self.currY))][int(round(self.currX))]==0):
+            #print("continuing ray")
             self.Propagate(False, 1,currentXStep,currentYStep)
         else:
             self.collisionPoint = Vector2(self.currX,self.currY)
+            #print(self.direction, "hit", self.collisionPoint)
 
     def __xRayLength(self, stepSize, gradient: Type[Vector2]):
         if gradient.x==0:

@@ -9,18 +9,19 @@ world = [
 [1,0,0,0,0,0,1],
 [1,0,0,0,0,0,1],
 [1,0,0,0,0,0,1],
-[1,0,0,0,1,0,1],
+[1,0,0,0,0,0,1],
 [1,0,0,0,0,0,1],
 [1,1,1,1,1,1,1]
 ]
 
 pygame.init()
-window = pygame.display.set_mode((1280, 720))
+screenDimensions = Vector2(1280, 720)
+window = pygame.display.set_mode((screenDimensions.x, screenDimensions.y))
 player = Player(world,Vector2(3,3),0,0)
-angle = 45;
-print(Vector2(math.cos(angle*math.pi/180),math.sin(angle*math.pi/180)))
-print(ray.Raycast(world, player.position, normalise(Vector2(math.cos(angle*math.pi/180),math.sin(angle*math.pi/180))), 20))
-sys.exit()
+lookAngle = 45;
+#print(Vector2(math.cos(angle*math.pi/180),math.sin(angle*math.pi/180)))
+#print(ray.Raycast(world, player.position, , 20))
+#sys.exit()
 run = True
 while run:
     #Cycles through all the events currently occuring
@@ -35,13 +36,23 @@ while run:
 
     pixel_array = pygame.PixelArray(window)
 
-    for x in range(20):
-        u = x / (20 - 1)
-        color = (round(u*255), 0, round((1-u)*255))
-        pixel_array[rect.left + x, rect.top:rect.bottom] = color
+    #create ray ray samples
+    samples = ray.RenderViewSamples(world,pygame.display.get_surface().get_width(), player.position, player.rotation+10, 20)
+    print("fired ",len(samples)," rays")
+    i = 0;
+    for raySample in samples:
+        #u = x / (20 - 1)
+        color = (round(255/raySample.currDist), 0, round(255/raySample.currDist))
+        #rect.top:rect.bottom
+        height = pygame.display.get_surface().get_height()
+        distSize = height/raySample.currDist
+        #print(raySample.currDist)
+        upper = int(height/2 + distSize/2)
+        lower = int(height/2 - distSize/2)
+        pixel_array[i,upper:lower] = color
+        i+=1
 
     pixel_array.close()
-
     pygame.display.flip()
 
 pygame.quit()

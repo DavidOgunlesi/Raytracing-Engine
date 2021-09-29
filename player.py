@@ -12,6 +12,7 @@ class Player:
         self.speed = speed
         self.turnSpeed = turnSpeed
 
+
     def InputListen(self, event):
         #Keyboard inputs
         keys = pygame.key.get_pressed()
